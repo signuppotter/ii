@@ -80,6 +80,50 @@ document.addEventListener('DOMContentLoaded', () => {
         observer.observe(el);
     });
 
+    // === Sidebar Tabs ===
+    $$('.cat-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            $$('.cat-tab').forEach(t => t.classList.remove('active'));
+            $$('.cat-panel').forEach(p => p.classList.remove('active'));
+            tab.classList.add('active');
+            const panel = $(`#panel-${tab.dataset.tab}`);
+            if (panel) panel.classList.add('active');
+        });
+    });
+
+    // === Sidebar Accordion ===
+    $$('.cat-group-head').forEach(head => {
+        head.addEventListener('click', () => {
+            const group = head.parentElement;
+            const panel = group.parentElement;
+            // Close other groups in the same panel
+            panel.querySelectorAll('.cat-group.open').forEach(g => {
+                if (g !== group) {
+                    g.classList.remove('open');
+                    g.querySelectorAll('.cat-subs a').forEach(a => {
+                        a.style.opacity = '0';
+                        a.style.transform = 'translateX(-8px)';
+                    });
+                }
+            });
+            const isOpening = !group.classList.contains('open');
+            group.classList.toggle('open');
+            // Staggered reveal of sub-items
+            if (isOpening) {
+                group.querySelectorAll('.cat-subs a').forEach((a, i) => {
+                    a.style.opacity = '0';
+                    a.style.transform = 'translateX(-8px)';
+                    a.style.transition = 'none';
+                    requestAnimationFrame(() => {
+                        a.style.transition = `opacity .25s ease ${i * 30}ms, transform .25s ease ${i * 30}ms`;
+                        a.style.opacity = '';
+                        a.style.transform = '';
+                    });
+                });
+            }
+        });
+    });
+
     // === Mobile Search (scroll to top + focus) ===
     $('#mob-search-btn')?.addEventListener('click', e => {
         e.preventDefault();
